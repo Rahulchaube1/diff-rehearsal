@@ -4,7 +4,7 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python: ['3.9', '3.13']
@@ -16,3 +16,20 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - run: python examples/build_demo.py "$RUNNER_TEMP/rehearsal.html"
       - run: cmp examples/rehearsal.html "$RUNNER_TEMP/rehearsal.html"
+
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish the example workbook
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" examples/rehearsal.html \
+            --verify-tag --title "Diff Rehearsal $RELEASE_TAG" \
+            --notes "Download rehearsal.html and open it in a browser. To practice with your own commit, download the source and run rehearse.py."
