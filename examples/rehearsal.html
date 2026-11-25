@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Diff Rehearsal · Practice workbook</title>
+<style>
+:root{color-scheme:light;--ink:#202f30;--muted:#506564;--line:#c6cfca;--paper:#f8f8f2;--pine:#193e3d;--mint:#cce8a8;--mono:ui-monospace,Consolas,monospace;font:16px/1.55 system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+*{box-sizing:border-box}body{margin:0}header,main,footer{max-width:1170px;margin:auto;padding:0 32px}
+header{display:flex;align-items:center;justify-content:space-between;padding-top:22px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.brand{font-weight:750;letter-spacing:-.045em;font-size:22px;display:flex;align-items:center;gap:10px}.mark{background:var(--pine);color:var(--mint);border-radius:7px;padding:2px 8px;font:700 22px/1.4 var(--mono)}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:1px solid var(--line);padding:9px 16px;border-radius:6px;font-weight:600;font-size:14px}
+button:hover{border-color:var(--pine);background:#e7ece2}button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #337773;outline-offset:3px}
+main{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.45fr);gap:clamp(25px,5vw,72px);align-items:start;padding-top:52px;padding-bottom:46px}
+.kicker,.label{font:650 11px/1.4 var(--mono);letter-spacing:.095em;text-transform:uppercase}.kicker{color:var(--muted)}h1,h2,p{margin:0}h1,h2{font-family:Georgia,'Times New Roman',serif;font-weight:normal;letter-spacing:-.045em;line-height:1.12;overflow-wrap:anywhere}h1{font-size:clamp(36px,4.4vw,66px);margin:14px 0 28px}h2{font-size:clamp(29px,3.2vw,47px);margin:12px 0}
+.evidence{background:var(--pine);color:#eef5e9;border-radius:12px;padding:22px}.evidence .label{color:var(--mint)}.stats{display:flex;flex-wrap:wrap;gap:18px;font:600 19px var(--mono);margin:18px 0}.stats small{font-size:12px;font-weight:400}.minus{color:#ffcac0}.plus{color:var(--mint)}details{border-top:1px solid #587270;padding-top:12px}summary{cursor:pointer;font-size:14px;font-weight:650}
+#files{padding:0;list-style:none;max-height:290px;overflow:auto}#files li{margin:8px 0;display:flex;gap:10px;align-items:baseline;justify-content:space-between;font:12px/1.5 var(--mono)}#files span:first-child{overflow-wrap:anywhere}#files span:last-child{white-space:nowrap;color:var(--mint)}
+.base{font-size:13px;color:var(--muted);margin:12px 2px}.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:28px}.tabs button{border:0;padding:8px 10px;color:var(--muted)}.tabs button[aria-current="step"]{background:var(--pine);color:white}
+.hint,.check,.session{color:var(--muted);font-size:15px}.hint{margin:12px 0 24px}.answer-label{display:block;font-size:14px;font-weight:700;margin-bottom:6px}textarea{width:100%;resize:vertical;min-height:146px;border-radius:8px;border:1px solid #a5b4ac;background:white;padding:14px;font:16px/1.6 system-ui;color:var(--ink)}.check{margin:8px 0 20px}.check strong{color:var(--ink)}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:12px}.primary{background:var(--pine);color:white;border-color:var(--pine)}.primary:hover{background:#2d5350}.session{font-size:13px;margin-top:18px}
+footer{border-top:1px solid var(--line);padding-top:14px;padding-bottom:18px;font:12px var(--mono);color:var(--muted)}.review{padding:12px 0;border-bottom:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.review b{display:block}
+[hidden]{display:none!important}@media(max-width:800px){main{grid-template-columns:1fr;gap:26px;padding-top:26px}.tabs{margin-bottom:16px}header,main,footer{padding-left:18px;padding-right:18px}h1{margin:8px 0 16px}.stats{margin:10px 0}.evidence{padding:16px}}
+</style>
+</head><body>
+<header><div class="brand"><span aria-hidden="true" class="mark">±</span> Diff Rehearsal</div><button type="button" id="export">Export notes ↓</button></header>
+<main><section aria-label="Commit evidence"><div class="kicker" id="commit"></div><h1 id="subject"></h1>
+<div class="evidence"><div class="label">Change evidence</div><div class="stats" id="stats"></div><details><summary>Inspect changed paths</summary><ul id="files"></ul></details></div><p class="base" id="base"></p></section>
+<section aria-label="Interview workbook"><nav class="tabs" id="tabs" aria-label="Practice questions"></nav>
+<div id="practice"><div class="kicker" id="step"></div><h2 id="question" tabindex="-1"></h2><p class="hint" id="hint"></p>
+<label class="answer-label" for="answer">Your answer</label><textarea id="answer" placeholder="Write what you would say out loud…"></textarea><p class="check"><strong>Self-check.</strong> <span id="rubric"></span></p></div>
+<div id="summary" hidden><div class="kicker">Session notes</div><h2 tabindex="-1" id="review-title">Review your answers</h2><div id="responses"></div></div>
+<div class="actions"><span id="count" aria-live="polite"></span><button type="button" id="next" class="primary"></button></div><p class="session">Answers stay in this tab. Export your notes before closing or refreshing.</p></section></main>
+<footer>Git evidence · <span id="short-sha"></span></footer>
+<script type="application/json" id="data">{"sha": "2b31542c7903d1b31774f6dcec14cd4531808a66", "subject": "Reject orders that exceed available stock", "parents": ["ab341dacfbcacc075cdf6de0baa8e1094355242b"], "files": [{"path": "reservations.py", "previous": null, "added": 2, "removed": 0}, {"path": "tests/test_reservations.py", "previous": null, "added": 9, "removed": 0}], "questions": [["Context", "What problem was worth changing?", "Describe the previous behavior, who experienced it and your part in the work.", "Name one concrete before-state."], ["Decision", "Why put this change in reservations.py? Describe one other place or layer you considered.", "Compare two plausible choices under a constraint you actually faced.", "Name the trade-off and who bears its cost."], ["Verification", "Walk through one case in tests/test_reservations.py. What nearby failure could still pass that check?", "Describe an input, an expected observation and a counterexample. Inspect the commit locally if needed.", "Distinguish a test you ran from one you would add."], ["Outcome", "What happened after this change reached users?", "Give an observed result and its source, or state what remains unknown and how you would measure it.", "Credit collaborators and label estimates."]]}</script>
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("data").textContent);
+const byId = id => document.getElementById(id);
+function el(tag, text, className) {
+  const item = document.createElement(tag);
+  item.textContent = text;
+  if (className) item.className = className;
+  return item;
+}
+const short = data.sha.slice(0, 10);
+byId("commit").textContent = "Commit / " + short;
+byId("short-sha").textContent = short;
+byId("subject").textContent = data.subject || "Untitled commit";
+byId("base").textContent = data.parents.length > 1 ? "Merge compared with its first parent." :
+  data.parents.length ? "Compared with parent " + data.parents[0].slice(0,10) + "." : "Initial commit, compared with an empty tree.";
+const stats = byId("stats");
+stats.append(el("span", data.files.length + (data.files.length === 1 ? " file" : " files")));
+for (const [key, sign, style] of [["added","+","plus"],["removed","−","minus"]]) {
+  stats.append(el("span", sign + data.files.reduce((sum, f) => sum + (f[key] || 0), 0), style));
+}
+for (const f of data.files) {
+  const li = el("li","");
+  li.append(el("span",f.previous ? f.previous + " → " + f.path : f.path),
+    el("span",f.added === null ? "binary" : "+" + f.added + " / −" + f.removed));
+  byId("files").append(li);
+}
+if (!data.files.length) byId("files").append(el("li","No changed paths."));
+const answers = data.questions.map(() => "");
+let current = 0;
+function countAnswers() {
+  const n = answers.filter(a => a.trim()).length;
+  byId("count").textContent = n + " of " + answers.length + " answered";
+}
+function show(index, focus = true) {
+  current = index;
+  const reviewing = index === answers.length;
+  byId("practice").hidden = reviewing;
+  byId("summary").hidden = !reviewing;
+  [...byId("tabs").children].forEach((b,i) => {
+    if (i === index) b.setAttribute("aria-current","step");
+    else b.removeAttribute("aria-current");
+  });
+  if (reviewing) {
+    byId("responses").replaceChildren();
+    data.questions.forEach(([label],i) => {
+      const p = el("p","","review");
+      p.append(el("b",label),document.createTextNode(answers[i] || "Unanswered"));
+      byId("responses").append(p);
+    });
+    byId("next").textContent = "Return to practice";
+  } else {
+    const [label, question, hint, rubric] = data.questions[index];
+    byId("step").textContent = "Question " + (index+1) + " / " + label;
+    byId("question").textContent = question;
+    byId("hint").textContent = hint;
+    byId("rubric").textContent = rubric;
+    byId("answer").value = answers[index];
+    byId("next").textContent = index === answers.length-1 ? "Review answers →" : "Next question →";
+  }
+  countAnswers();
+  if (focus) byId(reviewing ? "review-title" : "question").focus();
+}
+data.questions.forEach(([label], index) => {
+  const btn = el("button",label);
+  btn.onclick = () => show(index);
+  byId("tabs").append(btn);
+});
+byId("answer").oninput = event => { answers[current] = event.target.value; countAnswers(); };
+byId("next").onclick = () => show(current === answers.length ? 0 : current+1);
+byId("export").onclick = () => {
+  const lines = ["# Diff Rehearsal", "", data.subject, "", "Commit " + data.sha, ""];
+  data.questions.forEach(([label, question], i) => {
+    lines.push("## " + label, "", question, "", answers[i] || "(unanswered)", "");
+  });
+  const url = URL.createObjectURL(new Blob([lines.join("\n")], {type:"text/markdown;charset=utf-8"}));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "rehearsal-" + short + ".md";
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+show(0, false);
+</script></body></html>
