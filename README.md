@@ -1,8 +1,31 @@
 # Diff Rehearsal
 
-Turn one Git commit into a practice interview. Open a self-contained workbook, defend a decision from your own code, and export four answers you can use in a review or interview.
+**Could you defend your last commit in a code review?** Diff Rehearsal turns one Git commit into four practice questions. Write your answers in the browser and export them as Markdown. No account or API key required.
 
-**[Download the example workbook](https://github.com/Rahulchaube1/diff-rehearsal/releases/latest/download/rehearsal.html)** and open it in your browser. The example asks why an inventory check belongs next to the stock calculation and which nearby case the overbooking test could miss. The workbook runs offline and needs no account, model or API key.
+**[Try the workbook in your browser](https://rawcdn.githack.com/Rahulchaube1/diff-rehearsal/c99944cfcbaac50ed05ede47fe0c5a87c8213930/examples/rehearsal.html)** · [Download it for offline use](https://github.com/Rahulchaube1/diff-rehearsal/releases/latest/download/rehearsal.html) · [Read a completed example](examples/interview-notes.md)
+
+On your first visit, the demo host may ask you to select **Open the page**. You can practice all four rounds without installing anything.
+
+### One commit, one interview question
+
+In the [sample project](examples/build_demo.py), the commit *Reject orders that exceed available stock* adds this guard to `reservations.py` and a test that tries to reserve three units when only two are available.
+
+```diff
+ def reserve(stock, units):
++    if units > stock:
++        raise ValueError("insufficient stock")
+     return stock - units
+```
+
+Choose **Verification** in the workbook. Here’s that round from an example Markdown export. The workbook supplies the question. The engineer supplies the answer.
+
+```markdown
+## Verification
+
+Walk through one case in tests/test_reservations.py. What nearby failure could still pass that check?
+
+The test calls reserve(2, 3) and expects ValueError. Changing > to >= would still pass. I would add reserve(2, 2) and assert that it returns 0.
+```
 
 ![An interview workbook showing an inventory change, its two changed files, and a practice answer about concurrent reservations.](examples/preview.png)
 
